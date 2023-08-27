@@ -380,7 +380,7 @@ fn parse_date(date: &DateConfig, node: &NodeDataRef<ElementData>) -> Option<Offs
         .flatten()
         .and_then(|datetime| {
             debug!("trying datetime attribute");
-            date.parse(trim_date(datetime)).ok()
+            date.parse_datetime(trim_date(datetime)).ok()
         })
         .map(|x| {
             debug!("using datetime attribute");

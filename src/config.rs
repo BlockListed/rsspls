@@ -91,21 +91,25 @@ impl DateConfig {
         &self.selector
     }
 
+    pub fn parse_datetime(&self, date: &str) -> eyre::Result<OffsetDateTime> {
+        debug!("attempting to parse {} with anydate", date);
+        anydate::parse(date)
+            .map(|chrono| {
+                // Convert chrono DateTime<FixedOffset> to time OffsetDateTime
+                OffsetDateTime::from_unix_timestamp(chrono.timestamp())
+                    .unwrap()
+                    .to_offset(
+                        UtcOffset::from_whole_seconds(chrono.timezone().local_minus_utc())
+                            .unwrap(),
+                    )
+            })
+            .map_err(eyre::Report::from)
+    }
+
     pub fn parse(&self, date: &str) -> eyre::Result<OffsetDateTime> {
         match self {
             DateConfig { format: None, .. } => {
-                debug!("attempting to parse {} with anydate", date);
-                anydate::parse(date)
-                    .map(|chrono| {
-                        // Convert chrono DateTime<FixedOffset> to time OffsetDateTime
-                        OffsetDateTime::from_unix_timestamp(chrono.timestamp())
-                            .unwrap()
-                            .to_offset(
-                                UtcOffset::from_whole_seconds(chrono.timezone().local_minus_utc())
-                                    .unwrap(),
-                            )
-                    })
-                    .map_err(eyre::Report::from)
+                self.parse_datetime(date)
             }
             DateConfig {
                 format: Some(format),
