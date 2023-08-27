@@ -375,7 +375,7 @@ fn extract_pub_date(
 
 fn parse_date(date: &DateConfig, node: &NodeDataRef<ElementData>) -> Option<OffsetDateTime> {
     let attrs = node.attributes.borrow();
-    (&node.name.local == "time")
+    (&node.name.local == "time" || &node.name.local == "date")
         .then(|| attrs.get("datetime"))
         .flatten()
         .and_then(|datetime| {
